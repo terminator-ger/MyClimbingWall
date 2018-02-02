@@ -1,0 +1,187 @@
+ /* eslint no-underscore-dangle: "off" */
+  /* eslint no-mixed-operators: "off" */
+
+  
+  const MIN_SCALE = 1 // 1=scaling when first loaded
+  const MAX_SCALE = 64
+  // HammerJS fires "pinch" and "pan" events that are cumulative in nature and not
+  // deltas. Therefore, we need to store the "last" values of scale, x and y so that we can
+  // adjust the UI accordingly. It isn't until the "pinchend" and "panend" events are received
+  // that we can set the "last" values.
+  // Our "raw" coordinates are not scaled. This allows us to only have to modify our stored
+  // coordinates when the UI is updated. It also simplifies our calculations as these
+  // coordinates are without respect to the current scale.
+  let imgWidth = null
+  let imgHeight = null
+  let viewportWidth = null
+  let viewportHeight = null
+  let scale = null
+  let lastScale = null
+  let container = null
+  let img = null
+  let x = 0
+  let lastX = 0
+  let y = 0
+  let lastY = 0
+  let pinchCenter = null
+  // We need to disable the following event handlers so that the browser doesn't try to
+  // automatically handle our image drag gestures.
+  const disableImgEventHandlers = function () {
+    const events = ['onclick', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover',
+      'onmouseup', 'ondblclick', 'onfocus', 'onblur']
+    events.forEach((event) => {
+      img[event] = function () {
+        return false
+      }
+    })
+  }
+  // Traverse the DOM to calculate the absolute position of an element
+  const absolutePosition = function (el) {
+    let x_ = 0
+    let y_ = 0
+    while (el !== null) {
+      x_ += el.offsetLeft
+      y_ += el.offsetTop
+      el = el.offsetParent
+    }
+    return { x_, y_ }
+  }
+  const restrictScale = function (scale) {
+    if (scale < MIN_SCALE) {
+      scale = MIN_SCALE
+    } else if (scale > MAX_SCALE) {
+      scale = MAX_SCALE
+    }
+    return scale
+  }
+  const restrictRawPos = function (pos, viewportDim, imgDim) {
+    if (pos < viewportDim / scale - imgDim) { // too far left/up?
+      pos = viewportDim / scale - imgDim
+    } else if (pos > 0) { // too far right/down?
+      pos = 0
+    }
+    return pos
+  }
+  const updateLastPos = function (deltaX, deltaY) {
+    lastX = x
+    lastY = y
+  }
+  const translate = function (deltaX, deltaY) {
+    // We restrict to the min of the viewport width/height or current width/height as the
+    // current width/height may be smaller than the viewport width/height
+    const newX = restrictRawPos(
+      lastX + (deltaX / scale),
+      Math.min(viewportWidth, curWidth), imgWidth,
+    )
+    x = newX
+    img.style.marginLeft = `${Math.ceil(newX * scale)}px`
+    const newY = restrictRawPos(
+      lastY + (deltaY / scale),
+      Math.min(viewportHeight, curHeight), imgHeight,
+    )
+    y = newY
+    img.style.marginTop = `${Math.ceil(newY * scale)}px`
+  }
+  const zoom = function (scaleBy) {
+    scale = restrictScale(lastScale * scaleBy)
+    curWidth = imgWidth * scale
+    curHeight = imgHeight * scale
+    img.style.width = `${Math.ceil(curWidth)}px`
+    img.style.height = `${Math.ceil(curHeight)}px`
+    // Adjust margins to make sure that we aren't out of bounds
+    translate(0, 0)
+  }
+  const rawCenter = function (e) {
+    const pos = absolutePosition(container)
+    // We need to account for the scroll position
+    const scrollLeft = window.pageXOffset ? window.pageXOffset : document.body.scrollLeft
+    const scrollTop = window.pageYOffset ? window.pageYOffset : document.body.scrollTop
+    const zoomX = -x + (e.center.x - pos.x + scrollLeft) / scale
+    const zoomY = -y + (e.center.y - pos.y + scrollTop) / scale
+    return { x: zoomX, y: zoomY }
+  }
+  const updateLastScale = function () {
+    lastScale = scale
+  }
+  const zoomAround = function (scaleBy, rawZoomX, rawZoomY, doNotUpdateLast) {
+    // Zoom
+    zoom(scaleBy)
+    // New raw center of viewport
+    const rawCenterX = -x + Math.min(viewportWidth, curWidth) / 2 / scale
+    const rawCenterY = -y + Math.min(viewportHeight, curHeight) / 2 / scale
+    // Delta
+    const deltaX = (rawCenterX - rawZoomX) * scale
+    const deltaY = (rawCenterY - rawZoomY) * scale
+    // Translate back to zoom center
+    translate(deltaX, deltaY)
+    if (!doNotUpdateLast) {
+      updateLastScale()
+      updateLastPos()
+    }
+  }
+  const zoomCenter = function (scaleBy) {
+    // Center of viewport
+    const zoomX = -x + Math.min(viewportWidth, curWidth) / 2 / scale
+    const zoomY = -y + Math.min(viewportHeight, curHeight) / 2 / scale
+    zoomAround(scaleBy, zoomX, zoomY)
+  }
+  const zoomIn = function () {
+    zoomCenter(2)
+  }
+  const zoomOut = function () {
+    zoomCenter(1 / 2)
+  }
+  const onLoad = function () {
+  img = document.getElementById('pinch-zoom-image-id')
+  container = img.parentElement
+  disableImgEventHandlers()
+  imgWidth = img.width
+  imgHeight = img.height
+  viewportWidth = img.offsetWidth
+  scale = viewportWidth / imgWidth
+  lastScale = scale
+  viewportHeight = img.parentElement.offsetHeight
+  curWidth = imgWidth * scale
+  curHeight = imgHeight * scale
+  const hammer = new Hammer(container, {
+      domEvents: true,
+    })
+  hammer.get('pinch').set({
+      enable: true,
+    })
+  hammer.on('pan', (e) => {
+      translate(e.deltaX, e.deltaY)
+  })
+  hammer.on('panend', (e) => {
+      updateLastPos()
+  })
+  hammer.on('pinch', (e) => {
+    // We only calculate the pinch center on the first pinch event as we want the center to
+    // stay consistent during the entire pinch
+      if (pinchCenter === null) {
+        pinchCenter = rawCenter(e)
+        const offsetX = pinchCenter.x * scale - (-x * scale + Math.min(viewportWidth, curWidth) / 2)
+        const offsetY = pinchCenter.y * scale - (-y * scale + Math.min(viewportHeight, curHeight) / 2)
+        pinchCenterOffset = { x: offsetX, y: offsetY }
+      }
+      // When the user pinch zooms, she/he expects the pinch center to remain in the same
+      // relative location of the screen. To achieve this, the raw zoom center is calculated by
+      // first storing the pinch center and the scaled offset to the current center of the
+      // image. The new scale is then used to calculate the zoom center. This has the effect of
+      // actually translating the zoom center on each pinch zoom event.
+      const newScale = restrictScale(scale * e.scale)
+      const zoomX = pinchCenter.x * newScale - pinchCenterOffset.x
+      const zoomY = pinchCenter.y * newScale - pinchCenterOffset.y
+      const zoomCenter = { x: zoomX / newScale, y: zoomY / newScale }
+      zoomAround(e.scale, zoomCenter.x, zoomCenter.y, true)
+  })
+  hammer.on('pinchend', (e) => {
+      updateLastScale()
+      updateLastPos()
+      pinchCenter = null
+  })
+  hammer.on('doubletap', (e) => {
+      const c = rawCenter(e)
+      zoomAround(2, c.x, c.y)
+  })  
+}

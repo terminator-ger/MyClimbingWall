@@ -1,0 +1,83 @@
+{
+  "title": "My Climbing Wall",
+  "defaultLanguage": "en",
+  "defaultLanguageFallback": false,
+  "theme": "material",
+  "color": "indigo",
+  "layout": "default",
+  "statusbarVisibility": true,
+  "statusbarTextColor": "white",
+  "statusbarBackgroundColor": "#000000",
+  "iconBackgroundColor": "#ffffff",
+  "useIconFonts": {
+    "framework7": false,
+    "material": true,
+    "ion": false,
+    "fontawesome": false
+  },
+  "limitApplicationWidth": 320,
+  "limitApplicationHeight": 570,
+  "limitedSizeBodyBackgroundColor": "#333333",
+  "showPhoneFrameOnDesktop": true,
+  "phoneFrameBodyBackgroundColor": "#fafafa",
+  "framework7parameters": {},
+  "materialSubnavbarFix": true,
+  "restoreHistory": true,
+  "restoreComponentData": true,
+  "completeRoutesFile": true,
+  "firebase": {
+    "apiKey": "",
+    "authDomain": "",
+    "databaseURL": "",
+    "storageBucket": "",
+    "projectId": "",
+    "allowEmailLogin": false,
+    "allowEmailRegistration": false
+  },
+  "devFirebase": {
+    "deployDevRulesOnTesting": false,
+    "apiKey": "",
+    "authDomain": "",
+    "databaseURL": "",
+    "storageBucket": "",
+    "projectId": "",
+    "allowEmailLogin": false,
+    "allowEmailRegistration": false
+  },
+  "loginRequiredForAllPages": false,
+  "appStoreId": "",
+  "playStoreId": "",
+  "useCordovaPlugins": [],
+  "cordovaPreferences": {
+    "DisallowOverscroll": true
+  },
+  "resetLocalStorageOnVersionChange": false,
+  "preloadImages": true,
+  "buildSourcemaps": false,
+  "editorConfig": {
+    "root": "true",
+    "[*]": null,
+    "indent_style": "space",
+    "indent_size": "2",
+    "charset": "utf-8",
+    "trim_trailing_whitespace": "true",
+    "insert_final_newline": "true",
+    "end_of_line": "lf",
+    "max_line_length": "null"
+  },
+  "eslint": {
+    "extends": "airbnb",
+    "rules": {
+      "semi": [
+        "error",
+        "never"
+      ]
+    }
+  },
+  "fixCodeOnTest": true,
+  "fixCodeOnBuild": true,
+  "devServerPort": "8080",
+  "gitignore": {},
+  "npmignore": {},
+  "debug": false
+}

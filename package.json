@@ -1,0 +1,36 @@
+{
+  "name": "MyClimbingWall",
+  "version": "1.0.0",
+  "devDependencies": {
+    "app-framework": "^1.20.0"
+  },
+  "scripts": {
+    "android": "node node_modules/app-framework/scripts/cordova --android",
+    "backup": "node node_modules/app-framework/scripts/backup",
+    "check": "node node_modules/app-framework/scripts/code-check",
+    "database": "node node_modules/app-framework/scripts/firebase --database",
+    "dev": "node node_modules/app-framework/scripts/dev",
+    "firebase": "node node_modules/app-framework/scripts/firebase --database --storage --hosting",
+    "fix": "node node_modules/app-framework/scripts/code-check --fix",
+    "ftp": "node node_modules/app-framework/scripts/ftp",
+    "hosting": "node node_modules/app-framework/scripts/firebase --hosting",
+    "icons": "node node_modules/app-framework/scripts/deprecated",
+    "ios": "node node_modules/app-framework/scripts/cordova --ios",
+    "major": "node node_modules/app-framework/scripts/build --major",
+    "minor": "node node_modules/app-framework/scripts/build --minor",
+    "patch": "node node_modules/app-framework/scripts/build --patch",
+    "reset-app": "node node_modules/app-framework/scripts/reset-app",
+    "snapshot": "node node_modules/app-framework/scripts/snapshot",
+    "storage": "node node_modules/app-framework/scripts/firebase --storage",
+    "studio": "node node_modules/app-framework/scripts/cordova --studio",
+    "xcode": "node node_modules/app-framework/scripts/cordova --xcode",
+    "zip": "node node_modules/app-framework/scripts/deprecated"
+  },
+  "dependencies": {
+    "dom7": "^2.0.1",
+    "framework7": "^2.0.6",
+    "framework7-vue": "^2.0.0",
+    "hammerjs": "^2.0.8",
+    "vue": "^2.5.13"
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/",
+    "component": "home.vue"
+  },
+  {
+    "path": "/searchboulder/",
+    "component": "searchboulder.vue"
+  },
+  {
+    "path": "/showboulder/",
+    "component": "showboulder.vue"
+  }
+]
